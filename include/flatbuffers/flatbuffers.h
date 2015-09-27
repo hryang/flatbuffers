@@ -88,8 +88,8 @@ typedef uint16_t voffset_t;
 typedef uintmax_t largest_scalar_t;
 
 // Pointer to relinquished memory.
-typedef std::unique_ptr<uint8_t, std::function<void(uint8_t * /* unused */)> >
-          unique_ptr_t;
+typedef std::shared_ptr<uint8_t> unique_ptr_t;
+    
 
 // Wrapper for uoffset_t to allow safe template specialization.
 template<typename T> struct Offset {
