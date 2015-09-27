@@ -27,7 +27,7 @@ const char *const kTypeNames[] = {
     IDLTYPE,
     FLATBUFFERS_GEN_TYPES(FLATBUFFERS_TD)
   #undef FLATBUFFERS_TD
-  nullptr
+  NULL
 };
 
 const char kTypeSizes[] = {
@@ -67,13 +67,13 @@ template<> inline bool atot<bool>(const char *s) {
   return 0 != atoi(s);
 }
 template<> inline float atot<float>(const char *s) {
-  return static_cast<float>(strtod(s, nullptr));
+  return static_cast<float>(strtod(s, NULL));
 }
 template<> inline double atot<double>(const char *s) {
-  return strtod(s, nullptr);
+  return strtod(s, NULL);
 }
 
-template<> inline Offset<void> atot<Offset<void>>(const char *s) {
+template<> inline Offset<void> atot<Offset<void> >(const char *s) {
   return Offset<void>(atoi(s));
 }
 
@@ -312,7 +312,7 @@ EnumDef *Parser::LookupEnum(const std::string &id) {
 void Parser::ParseTypeIdent(Type &type) {
   std::string id = attribute_;
   Expect(kTokenIdentifier);
-  ParseNamespacing(&id, nullptr);
+  ParseNamespacing(&id, NULL);
   EnumDef* enum_def = LookupEnum(id);
   if (enum_def) {
     type = enum_def->underlying_type;
@@ -389,7 +389,7 @@ void Parser::ParseField(StructDef &struct_def) {
   if (struct_def.fixed && !IsScalar(type.base_type) && !IsStruct(type))
     Error("structs_ may contain only scalar or struct fields");
 
-  FieldDef *typefield = nullptr;
+  FieldDef *typefield = NULL;
   if (type.base_type == BASE_TYPE_UNION) {
     // For union fields, add a second auto-generated field to hold the type,
     // with _type appended as the name.
@@ -418,20 +418,20 @@ void Parser::ParseField(StructDef &struct_def) {
 
   field.doc_comment = dc;
   ParseMetaData(field);
-  field.deprecated = field.attributes.Lookup("deprecated") != nullptr;
+  field.deprecated = field.attributes.Lookup("deprecated") != NULL;
   Value* hash_name = field.attributes.Lookup("hash");
   if (hash_name) {
     switch (type.base_type) {
       case BASE_TYPE_INT:
       case BASE_TYPE_UINT: {
-        if (FindHashFunction32(hash_name->constant.c_str()) == nullptr)
+        if (FindHashFunction32(hash_name->constant.c_str()) == NULL)
           Error("Unknown hashing algorithm for 32 bit types: " +
                 hash_name->constant);
         break;
       }
       case BASE_TYPE_LONG:
       case BASE_TYPE_ULONG: {
-        if (FindHashFunction64(hash_name->constant.c_str()) == nullptr)
+        if (FindHashFunction64(hash_name->constant.c_str()) == NULL)
           Error("Unknown hashing algorithm for 64 bit types: " +
                 hash_name->constant);
         break;
@@ -442,11 +442,11 @@ void Parser::ParseField(StructDef &struct_def) {
   }
   if (field.deprecated && struct_def.fixed)
     Error("can't deprecate fields in a struct");
-  field.required = field.attributes.Lookup("required") != nullptr;
+  field.required = field.attributes.Lookup("required") != NULL;
   if (field.required && (struct_def.fixed ||
                          IsScalar(field.value.type.base_type)))
     Error("only non-scalar fields in tables may be 'required'");
-  field.key = field.attributes.Lookup("key") != nullptr;
+  field.key = field.attributes.Lookup("key") != NULL;
   if (field.key) {
     if (struct_def.has_key)
       Error("only one field may be set as 'key'");
@@ -645,8 +645,8 @@ uoffset_t Parser::ParseVector(const Type &type) {
     if ((!strict_json_ || !count) && IsNext(']')) break;
     Value val;
     val.type = type;
-    ParseAnyValue(val, nullptr);
-    field_stack_.push_back(std::make_pair(val, nullptr));
+    ParseAnyValue(val, NULL);
+    field_stack_.push_back(std::make_pair(val, (FieldDef*)NULL));
     count++;
     if (IsNext(']')) break;
     Expect(',');
@@ -947,7 +947,7 @@ void Parser::ParseDecl() {
   struct_def.fixed = fixed;
   ParseMetaData(struct_def);
   struct_def.sortbysize =
-    struct_def.attributes.Lookup("original_order") == nullptr && !fixed;
+    struct_def.attributes.Lookup("original_order") == NULL && !fixed;
   Expect('{');
   while (token_ != '}') ParseField(struct_def);
   Value* force_align = struct_def.attributes.Lookup("force_align");
@@ -998,7 +998,7 @@ void Parser::ParseDecl() {
 
 bool Parser::SetRootType(const char *name) {
   root_struct_def_ = structs_.Lookup(GetFullyQualifiedName(name));
-  return root_struct_def_ != nullptr;
+  return root_struct_def_ != NULL;
 }
 
 std::string Parser::GetFullyQualifiedName(const std::string &name) const {
@@ -1161,7 +1161,7 @@ bool Parser::Parse(const char *source, const char **include_paths,
     files_being_parsed_.push(source_filename);
   }
   if (!include_paths) {
-    static const char *current_directory[] = { "", nullptr };
+    static const char *current_directory[] = { "", NULL };
     include_paths = current_directory;
   }
   source_ = cursor_ = source;
@@ -1221,7 +1221,7 @@ bool Parser::Parse(const char *source, const char **include_paths,
           Error("cannot have more than one json object in a file");
         }
         builder_.Finish(Offset<Table>(ParseTable(*root_struct_def_)),
-          file_identifier_.length() ? file_identifier_.c_str() : nullptr);
+          file_identifier_.length() ? file_identifier_.c_str() : NULL);
       } else if (token_ == kTokenEnum) {
         ParseEnum(false);
       } else if (token_ == kTokenUnion) {
@@ -1340,13 +1340,13 @@ void Parser::Serialize() {
   builder_.Clear();
   AssignIndices(structs_.vec);
   AssignIndices(enums_.vec);
-  std::vector<Offset<reflection::Object>> object_offsets;
+  std::vector<Offset<reflection::Object> > object_offsets;
   for (std::vector<StructDef*>::const_iterator it = structs_.vec.begin(); it != structs_.vec.end(); ++it) {
     Offset<reflection::Object> offset = (*it)->Serialize(&builder_);
     object_offsets.push_back(offset);
     (*it)->serialized_location = offset.o;
   }
-  std::vector<Offset<reflection::Enum>> enum_offsets;
+  std::vector<Offset<reflection::Enum> > enum_offsets;
   for (std::vector<EnumDef*>::const_iterator it = enums_.vec.begin(); it != enums_.vec.end(); ++it) {
     Offset<reflection::Enum> offset = (*it)->Serialize(&builder_);
     enum_offsets.push_back(offset);
@@ -1366,7 +1366,7 @@ void Parser::Serialize() {
 
 Offset<reflection::Object> StructDef::Serialize(FlatBufferBuilder *builder)
                                                                          const {
-  std::vector<Offset<reflection::Field>> field_offsets;
+  std::vector<Offset<reflection::Field> > field_offsets;
   for (std::vector<FieldDef*>::const_iterator it = fields.vec.begin(); it != fields.vec.end(); ++it) {
     field_offsets.push_back(
       (*it)->Serialize(builder,
@@ -1392,7 +1392,7 @@ Offset<reflection::Field> FieldDef::Serialize(FlatBufferBuilder *builder,
                                    ? StringToInt(value.constant.c_str())
                                    : 0,
                                  IsFloat(value.type.base_type)
-                                   ? strtod(value.constant.c_str(), nullptr)
+                                   ? strtod(value.constant.c_str(), NULL)
                                    : 0.0,
                                  deprecated,
                                  required,
@@ -1402,7 +1402,7 @@ Offset<reflection::Field> FieldDef::Serialize(FlatBufferBuilder *builder,
 }
 
 Offset<reflection::Enum> EnumDef::Serialize(FlatBufferBuilder *builder) const {
-  std::vector<Offset<reflection::EnumVal>> enumval_offsets;
+  std::vector<Offset<reflection::EnumVal> > enumval_offsets;
   for (std::vector<EnumVal*>::const_iterator it = vals.vec.begin(); it != vals.vec.end(); ++it) {
     enumval_offsets.push_back((*it)->Serialize(builder));
   }

@@ -195,7 +195,7 @@ inline void EnsureDirExists(const std::string &filepath) {
 inline std::string AbsolutePath(const std::string &filepath) {
   #ifdef _WIN32
     char abs_path[MAX_PATH];
-    return GetFullPathNameA(filepath.c_str(), MAX_PATH, abs_path, nullptr)
+    return GetFullPathNameA(filepath.c_str(), MAX_PATH, abs_path, NULL)
   #else
     char abs_path[PATH_MAX];
     return realpath(filepath.c_str(), abs_path)

@@ -78,9 +78,9 @@ template<typename T> void PrintVector(const Vector<T> &v, Type type,
     text.append(indent + Indent(opts), ' ');
     if (IsStruct(type))
       Print(v.GetStructFromOffset(i * type.struct_def->bytesize), type,
-            indent + Indent(opts), nullptr, opts, _text);
+            indent + Indent(opts), NULL, opts, _text);
     else
-      Print(v[i], type, indent + Indent(opts), nullptr,
+      Print(v[i], type, indent + Indent(opts), NULL,
             opts, _text);
   }
   text += NewLine(opts);
@@ -181,7 +181,7 @@ template<typename T> static void GenField(const FieldDef &fd,
                                           std::string *_text) {
   Print(fixed ?
     reinterpret_cast<const Struct *>(table)->GetField<T>(fd.value.offset) :
-    table->GetField<T>(fd.value.offset, 0), fd.value.type, indent, nullptr,
+    table->GetField<T>(fd.value.offset, 0), fd.value.type, indent, NULL,
                                             opts, _text);
 }
 
@@ -189,7 +189,7 @@ template<typename T> static void GenField(const FieldDef &fd,
 static void GenFieldOffset(const FieldDef &fd, const Table *table, bool fixed,
                            int indent, StructDef *union_sd,
                            const GeneratorOptions &opts, std::string *_text) {
-  const void *val = nullptr;
+  const void *val = NULL;
   if (fixed) {
     // The only non-scalar fields in structs are structs.
     assert(IsStruct(fd.value.type));
@@ -211,7 +211,7 @@ static void GenStruct(const StructDef &struct_def, const Table *table,
   std::string &text = *_text;
   text += "{";
   int fieldout = 0;
-  StructDef *union_sd = nullptr;
+  StructDef *union_sd = NULL;
   for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
        it != struct_def.fields.vec.end();
        ++it) {

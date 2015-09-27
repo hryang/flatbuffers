@@ -53,7 +53,7 @@ double GetAnyValueF(reflection::BaseType type, const uint8_t *data) {
     case reflection::String: {
       const String* s = reinterpret_cast<const String *>(ReadScalar<uoffset_t>(data) +
                                                 data);
-      return s ? strtod(s->c_str(), nullptr) : 0.0;
+      return s ? strtod(s->c_str(), NULL) : 0.0;
     }
     default: return static_cast<double>(GetAnyValueI(type, data));
   }
@@ -142,7 +142,7 @@ void SetAnyValueS(reflection::BaseType type, uint8_t *data, const char *val) {
   switch (type) {
     case reflection::Float:
     case reflection::Double:
-      SetAnyValueF(type, data, strtod(val, nullptr));
+      SetAnyValueF(type, data, strtod(val, NULL));
       break;
     // TODO: support strings.
     default: SetAnyValueI(type, data, StringToInt(val)); break;
@@ -161,7 +161,7 @@ class ResizeContext {
  public:
   ResizeContext(const reflection::Schema &schema, uoffset_t start, int delta,
                 std::vector<uint8_t> *flatbuf,
-                const reflection::Object *root_table = nullptr)
+                const reflection::Object *root_table = NULL)
      : schema_(schema), startptr_(flatbuf->data() + start),
        delta_(delta), buf_(*flatbuf),
        dag_check_(flatbuf->size() / sizeof(uoffset_t), false) {
@@ -381,7 +381,7 @@ Offset<const Table *> CopyTable(FlatBufferBuilder &fbb,
         break;
       }
       case reflection::Vector: {
-        const Vector<Offset<Table>> * vec = table.GetPointer<const Vector<Offset<Table>> *>(
+        const Vector<Offset<Table> > * vec = table.GetPointer<const Vector<Offset<Table> > *>(
                                                              fielddef.offset());
         reflection::BaseType element_base_type = fielddef.type()->element();
         const reflection::Object* elemobjectdef = element_base_type == reflection::Obj
@@ -389,7 +389,7 @@ Offset<const Table *> CopyTable(FlatBufferBuilder &fbb,
                              : NULL;
         switch (element_base_type) {
           case reflection::String: {
-            std::vector<Offset<const String *>> elements(vec->size());
+            std::vector<Offset<const String *> > elements(vec->size());
             const Vector<Offset<String> > * vec_s = reinterpret_cast<const Vector<Offset<String> > *>(vec);
             for (uoffset_t i = 0; i < vec_s->size(); i++) {
               elements[i] = fbb.CreateString(vec_s->Get(i)).o;
@@ -399,7 +399,7 @@ Offset<const Table *> CopyTable(FlatBufferBuilder &fbb,
           }
           case reflection::Obj: {
             if (!elemobjectdef->is_struct()) {
-              std::vector<Offset<const Table *>> elements(vec->size());
+              std::vector<Offset<const Table *> > elements(vec->size());
               for (uoffset_t i = 0; i < vec->size(); i++) {
                 elements[i] =
                   CopyTable(fbb, schema, *elemobjectdef, *vec->Get(i));

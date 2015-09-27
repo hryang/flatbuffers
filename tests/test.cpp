@@ -88,7 +88,7 @@ flatbuffers::unique_ptr_t CreateFlatBufferTest(std::string &buffer) {
   flatbuffers::Offset<flatbuffers::Vector<unsigned char> > inventory = builder.CreateVector(inv_data, 10);
 
   // Alternatively, create the vector first, and fill in data later:
-  // unsigned char *inv_buf = nullptr;
+  // unsigned char *inv_buf = NULL;
   // auto inventory = builder.CreateUninitializedVector<unsigned char>(
   //                                                              10, &inv_buf);
   // memcpy(inv_buf, inv_data, 10);
@@ -268,7 +268,7 @@ void ParseAndGenerateTextTest() {
 
   // parse schema first, so we can use it to parse the data after
   flatbuffers::Parser parser;
-  const char *include_directories[] = { "tests", nullptr };
+  const char *include_directories[] = { "tests", NULL };
   TEST_EQ(parser.Parse(schemafile.c_str(), include_directories), true);
   TEST_EQ(parser.Parse(jsonfile.c_str(), include_directories), true);
 
@@ -379,12 +379,12 @@ void ReflectionTest(uint8_t *flatbuf, size_t length) {
   const reflection::Field &testarrayofstring_field = *fields->LookupByKey("testarrayofstring");
   // Find the vector value:
   pointer_inside_vector<Vector<Offset<String> >, unsigned char> rtestarrayofstring = flatbuffers::piv(
-         flatbuffers::GetFieldV<flatbuffers::Offset<flatbuffers::String>>(
+         flatbuffers::GetFieldV<flatbuffers::Offset<flatbuffers::String> >(
            **rroot, testarrayofstring_field),
          resizingbuf);
   // It's a vector of 2 strings, to which we add one more, initialized to
   // offset 0.
-  flatbuffers::ResizeVector<flatbuffers::Offset<flatbuffers::String>>(
+  flatbuffers::ResizeVector<flatbuffers::Offset<flatbuffers::String> >(
         schema, 3, 0, *rtestarrayofstring, &resizingbuf);
   // Here we just create a buffer that contans a single string, but this
   // could also be any complex set of tables and other values.
@@ -429,7 +429,7 @@ void ParseProtoTest() {
 
   // Parse proto.
   flatbuffers::Parser parser(false, true);
-  TEST_EQ(parser.Parse(protofile.c_str(), nullptr), true);
+  TEST_EQ(parser.Parse(protofile.c_str(), NULL), true);
 
   // Generate fbs.
   flatbuffers::GeneratorOptions opts;
@@ -438,7 +438,7 @@ void ParseProtoTest() {
 
   // Ensure generated file is parsable.
   flatbuffers::Parser parser2;
-  TEST_EQ(parser2.Parse(fbs.c_str(), nullptr), true);
+  TEST_EQ(parser2.Parse(fbs.c_str(), NULL), true);
 
   if (fbs != goldenfile) {
     printf("%s----------------\n%s", fbs.c_str(), goldenfile.c_str());

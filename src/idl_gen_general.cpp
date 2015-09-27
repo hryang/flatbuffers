@@ -147,9 +147,9 @@ LanguageParameters language_parameters[] = {
     "Offset",
     "using FlatBuffers;\n\n",
     {
-      nullptr,
+      NULL,
       "///",
-      nullptr,
+      NULL,
     },
   },
   // TODO: add Go support to the general generator.
@@ -176,9 +176,9 @@ LanguageParameters language_parameters[] = {
     "offset()",
     "import (\n\tflatbuffers \"github.com/google/flatbuffers/go\"\n)",
     {
-      nullptr,
+      NULL,
       "///",
-      nullptr,
+      NULL,
     },
   }
 };
@@ -214,7 +214,7 @@ static std::string GenTypeBasic(const LanguageParameters &lang,
 static std::string GenTypeForUser(const LanguageParameters &lang,
                                   const Type &type) {
   if (lang.language == GeneratorOptions::kCSharp) {
-    if (type.enum_def != nullptr &&
+    if (type.enum_def != NULL &&
           type.base_type != BASE_TYPE_UNION) return type.enum_def->name;
   }
   return GenTypeBasic(lang, type);
@@ -296,7 +296,7 @@ static std::string GenTypeNameDest(const LanguageParameters &lang, const Type &t
 {
   if (lang.language == GeneratorOptions::kCSharp) {
     // C# enums are represented by themselves
-    if (type.enum_def != nullptr && type.base_type != BASE_TYPE_UNION)
+    if (type.enum_def != NULL && type.base_type != BASE_TYPE_UNION)
       return type.enum_def->name;
 
     // Unions in C# use a generic Table-derived type for better type safety
@@ -337,7 +337,7 @@ static std::string DestinationCast(const LanguageParameters &lang,
 
     case GeneratorOptions::kCSharp:
       // Cast from raw integral types to enum
-      if (type.enum_def != nullptr &&
+      if (type.enum_def != NULL &&
         type.base_type != BASE_TYPE_UNION) return "(" + type.enum_def->name + ")";
         break;
 
@@ -355,7 +355,7 @@ static std::string DestinationValue(const LanguageParameters &lang,
   // is a typecast needed? (for C# enums and unsigned values in Java)
   if (type_mask.length() ||
     (lang.language == GeneratorOptions::kCSharp &&
-    type.enum_def != nullptr &&
+    type.enum_def != NULL &&
     type.base_type != BASE_TYPE_UNION)) {
     return "(" + GenTypeBasic(lang, type) + ")(" + name + type_mask + ")";
   } else {
@@ -379,7 +379,7 @@ static std::string SourceCast(const LanguageParameters &lang,
         else if (type.base_type == BASE_TYPE_UCHAR) return "(byte)";
         break;
       case GeneratorOptions::kCSharp:
-        if (type.enum_def != nullptr && 
+        if (type.enum_def != NULL && 
             type.base_type != BASE_TYPE_UNION) 
           return "(" + GenTypeGet(lang, type) + ")";
         break;
@@ -876,7 +876,7 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
           // in C#, enum values have their own type, so we need to cast the
           // numeric value to the proper type
           if (lang.language == GeneratorOptions::kCSharp &&
-            field.value.type.enum_def != nullptr &&
+            field.value.type.enum_def != NULL &&
             field.value.type.base_type != BASE_TYPE_UNION) {
             code += "(" + field.value.type.enum_def->name + ")";
           }

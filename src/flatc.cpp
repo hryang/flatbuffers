@@ -222,7 +222,7 @@ int main(int argc, const char *argv[]) {
       } else {
         std::string local_include_directory = flatbuffers::StripFileName(*file_it);
         include_directories.push_back(local_include_directory.c_str());
-        include_directories.push_back(nullptr);
+        include_directories.push_back(NULL);
         if (!parser.Parse(contents.c_str(), &include_directories[0],
                           file_it->c_str()))
           Error(parser.error_, false, false);

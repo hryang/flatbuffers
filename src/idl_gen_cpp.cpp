@@ -169,7 +169,7 @@ static void GenEnum(const Parser &parser, EnumDef &enum_def,
       while (val++ != (*it)->value) code += "\"\", ";
       code += "\"" + (*it)->name + "\", ";
     }
-    code += "nullptr };\n  return names;\n}\n\n";
+    code += "NULL };\n  return names;\n}\n\n";
     code += "inline const char *EnumName" + enum_def.name;
     code += "(" + enum_def.name + " e) { return EnumNames" + enum_def.name + "()[e";
     if (enum_def.vals.vec.front()->value)
@@ -235,7 +235,7 @@ static void GenTable(const Parser &parser, StructDef &struct_def,
     FieldDef &field = **it;
     if (!field.deprecated) {  // Deprecated fields won't be accessible.
       bool is_scalar = IsScalar(field.value.type.base_type);
-      GenComment(field.doc_comment, code_ptr, nullptr, "  ");
+      GenComment(field.doc_comment, code_ptr, NULL, "  ");
       code += "  " + GenTypeGet(parser, field.value.type, " ", "const ", " *",
                                 true);
       code += field.name + "() const { return ";
@@ -589,7 +589,7 @@ static void GenStruct(const Parser &parser, StructDef &struct_def,
        it != struct_def.fields.vec.end();
        ++it) {
     FieldDef &field = **it;
-    GenComment(field.doc_comment, code_ptr, nullptr, "  ");
+    GenComment(field.doc_comment, code_ptr, NULL, "  ");
     bool is_scalar = IsScalar(field.value.type.base_type);
     code += "  " + GenTypeGet(parser, field.value.type, " ", "const ", " &",
                               true);
@@ -651,7 +651,7 @@ std::string GenerateCPP(const Parser &parser,
   // have circular references.
   std::string forward_decl_code_same_namespace;
   std::string forward_decl_code_other_namespace;
-  Namespace *cur_name_space = nullptr;
+  Namespace *cur_name_space = NULL;
   for (std::vector<StructDef *>::const_iterator it = parser.structs_.vec.begin();
        it != parser.structs_.vec.end(); ++it) {
     StructDef &struct_def = **it;

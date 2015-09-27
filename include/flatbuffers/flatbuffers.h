@@ -88,7 +88,7 @@ typedef uint16_t voffset_t;
 typedef uintmax_t largest_scalar_t;
 
 // Pointer to relinquished memory.
-typedef std::unique_ptr<uint8_t, std::function<void(uint8_t * /* unused */)>>
+typedef std::unique_ptr<uint8_t, std::function<void(uint8_t * /* unused */)> >
           unique_ptr_t;
 
 // Wrapper for uoffset_t to allow safe template specialization.
@@ -173,7 +173,7 @@ template<typename T> struct IndirectHelper {
     return EndianScalar((reinterpret_cast<const T *>(p))[i]);
   }
 };
-template<typename T> struct IndirectHelper<Offset<T>> {
+template<typename T> struct IndirectHelper<Offset<T> > {
   typedef const T *return_type;
   static const size_t element_stride = sizeof(uoffset_t);
   static return_type Read(const uint8_t *p, uoffset_t i) {
@@ -326,7 +326,7 @@ public:
         IndirectHelper<T>::element_stride, KeyCompare<K>);
 
     if (!search_result) {
-      return nullptr;  // Key not found.
+      return NULL;  // Key not found.
     }
 
     const uint8_t *data = reinterpret_cast<const uint8_t *>(search_result);
@@ -415,7 +415,7 @@ class vector_downward {
   }
 
   void clear() {
-    if (buf_ == nullptr)
+    if (buf_ == NULL)
       buf_ = allocator_.allocate(reserved_);
 
     cur_ = buf_ + reserved_;
@@ -431,8 +431,8 @@ class vector_downward {
     unique_ptr_t retval(data(), deleter);
 
     // Don't deallocate when this instance is destroyed.
-    buf_ = nullptr;
-    cur_ = nullptr;
+    buf_ = NULL;
+    cur_ = NULL;
 
     return retval;
   }
@@ -522,7 +522,7 @@ inline size_t PaddingBytes(size_t buf_size, size_t scalar_size) {
 class FlatBufferBuilder FLATBUFFERS_FINAL_CLASS {
  public:
   explicit FlatBufferBuilder(uoffset_t initial_size = 1024,
-                             const simple_allocator *allocator = nullptr)
+                             const simple_allocator *allocator = NULL)
       : buf_(initial_size, allocator ? *allocator : default_allocator),
         minalign_(1), force_defaults_(false) {
     offsetbuf_.reserve(16);  // Avoid first few reallocs.
@@ -767,7 +767,7 @@ class FlatBufferBuilder FLATBUFFERS_FINAL_CLASS {
     for (size_t i = len; i > 0; ) {
       PushElement(v[--i]);
     }
-    return Offset<Vector<T>>(EndVector(len));
+    return Offset<Vector<T> >(EndVector(len));
   }
 
   template<typename T> Offset<Vector<T> > CreateVector(const std::vector<T> &v) {
@@ -779,7 +779,7 @@ class FlatBufferBuilder FLATBUFFERS_FINAL_CLASS {
     NotNested();
     StartVector(len * sizeof(T) / AlignOf<T>(), AlignOf<T>());
     PushBytes(reinterpret_cast<const uint8_t *>(v), sizeof(T) * len);
-    return Offset<Vector<const T *>>(EndVector(len));
+    return Offset<Vector<const T *> >(EndVector(len));
   }
 
   template<typename T> Offset<Vector<const T *> > CreateVectorOfStructs(
@@ -811,7 +811,7 @@ public:
   }
 
   template<typename T> Offset<Vector<Offset<T> > > CreateVectorOfSortedTables(
-                                                    std::vector<Offset<T>> *v) {
+                                                    std::vector<Offset<T> > *v) {
     return CreateVectorOfSortedTables(v->data(), v->size());
   }
 
@@ -825,7 +825,7 @@ public:
     return EndVector(len);
   }
 
-  template<typename T> Offset<Vector<T>> CreateUninitializedVector(
+  template<typename T> Offset<Vector<T> > CreateUninitializedVector(
                                                     size_t len, T **buf) {
     return CreateUninitializedVector(len, sizeof(T),
                                      reinterpret_cast<uint8_t **>(buf));
@@ -837,7 +837,7 @@ public:
   // If a file_identifier is given, the buffer will be prefix with a standard
   // FlatBuffers file header.
   template<typename T> void Finish(Offset<T> root,
-                                   const char *file_identifier = nullptr) {
+                                   const char *file_identifier = NULL) {
     // This will cause the whole buffer to be aligned.
     PreAlign(sizeof(uoffset_t) + (file_identifier ? kFileIdentifierLength : 0),
              minalign_);
@@ -953,7 +953,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
   }
 
   // Special case for string contents, after the above has been called.
-  bool VerifyVectorOfStrings(const Vector<Offset<String>> *vec) const {
+  bool VerifyVectorOfStrings(const Vector<Offset<String> > *vec) const {
       if (vec) {
         for (uoffset_t i = 0; i < vec->size(); i++) {
           if (!Verify(vec->Get(i))) return false;
@@ -963,7 +963,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
   }
 
   // Special case for table contents, after the above has been called.
-  template<typename T> bool VerifyVectorOfTables(const Vector<Offset<T>> *vec) {
+  template<typename T> bool VerifyVectorOfTables(const Vector<Offset<T> > *vec) {
     if (vec) {
       for (uoffset_t i = 0; i < vec->size(); i++) {
         if (!vec->Get(i)->Verify(*this)) return false;

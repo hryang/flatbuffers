@@ -76,12 +76,12 @@ std::string GenerateFBS(const Parser &parser, const std::string &file_name,
   for (std::vector<StructDef*>::const_iterator it = parser.structs_.vec.begin();
            it != parser.structs_.vec.end(); ++it) {
     StructDef &struct_def = **it;
-    GenComment(struct_def.doc_comment, &schema, nullptr);
+    GenComment(struct_def.doc_comment, &schema, NULL);
     schema += "table " + struct_def.name + " {\n";
     for (std::vector<FieldDef*>::const_iterator field_it = struct_def.fields.vec.begin();
              field_it != struct_def.fields.vec.end(); ++field_it) {
       FieldDef &field = **field_it;
-      GenComment(field.doc_comment, &schema, nullptr, "  ");
+      GenComment(field.doc_comment, &schema, NULL, "  ");
       schema += "  " + field.name + ":" + GenType(field.value.type);
       if (field.value.constant != "0") schema += " = " + field.value.constant;
       if (field.required) schema += " (required)";

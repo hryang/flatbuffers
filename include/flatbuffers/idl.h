@@ -118,7 +118,7 @@ struct EnumDef;
 // and additional information for vectors/structs_.
 struct Type {
   explicit Type(BaseType _base_type = BASE_TYPE_NONE,
-                StructDef *_sd = nullptr, EnumDef *_ed = nullptr)
+                StructDef *_sd = NULL, EnumDef *_ed = NULL)
     : base_type(_base_type),
       element(BASE_TYPE_NONE),
       struct_def(_sd),
@@ -182,7 +182,7 @@ struct Namespace {
 
 // Base class for all definition types (fields, structs_, enums_).
 struct Definition {
-  Definition() : generated(false), defined_namespace(nullptr),
+  Definition() : generated(false), defined_namespace(NULL),
                  serialized_location(0), index(-1) {}
 
   std::string name;
@@ -254,7 +254,7 @@ inline size_t InlineAlignment(const Type &type) {
 
 struct EnumVal {
   EnumVal(const std::string &_name, int64_t _val)
-    : name(_name), value(_val), struct_def(nullptr) {}
+    : name(_name), value(_val), struct_def(NULL) {}
 
   Offset<reflection::EnumVal> Serialize(FlatBufferBuilder *builder) const;
 
@@ -317,13 +317,13 @@ class Parser {
   // populate the SymbolTable's or the FlatBufferBuilder above.
   // include_paths is used to resolve any include statements, and typically
   // should at least include the project path (where you loaded source_ from).
-  // include_paths must be nullptr terminated if specified.
-  // If include_paths is nullptr, it will attempt to load from the current
+  // include_paths must be NULL terminated if specified.
+  // If include_paths is NULL, it will attempt to load from the current
   // directory.
   // If the source was loaded from a file and isn't an include file,
   // supply its name in source_filename.
-  bool Parse(const char *_source, const char **include_paths = nullptr,
-             const char *source_filename = nullptr);
+  bool Parse(const char *_source, const char **include_paths = NULL,
+             const char *source_filename = NULL);
 
   // Set the root type. May override the one set in the schema.
   bool SetRootType(const char *name);
@@ -389,7 +389,7 @@ class Parser {
   std::string file_extension_;
 
   std::map<std::string, bool> included_files_;
-  std::map<std::string, std::set<std::string>> files_included_per_file_;
+  std::map<std::string, std::set<std::string> > files_included_per_file_;
 
  private:
   const char *source_, *cursor_;
@@ -401,7 +401,7 @@ class Parser {
   std::string attribute_;
   std::vector<std::string> doc_comment_;
 
-  std::vector<std::pair<Value, FieldDef *>> field_stack_;
+  std::vector<std::pair<Value, FieldDef *> > field_stack_;
   std::vector<uint8_t> struct_stack_;
 
   std::set<std::string> known_attributes_;
