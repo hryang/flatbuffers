@@ -68,7 +68,7 @@ template<> inline std::string NumToString<double>(double t) {
   size_t p = s.find_last_not_of('0');
   if (p != std::string::npos) {
     s.resize(p + 1);  // Strip trailing zeroes.
-    if (s.back() == '.') s.pop_back();  // Strip '.' if a whole number.
+    if (s[s.size()-1] == '.') s.erase(s.size()-1, 1);  // Strip '.' if a whole number.
   }
   return s;
 }
@@ -171,8 +171,8 @@ inline std::string StripFileName(const std::string &filepath) {
 inline std::string ConCatPathFileName(const std::string &path,
                                       const std::string &filename) {
   std::string filepath = path;
-  if (path.length() && path.back() != kPathSeparator &&
-                       path.back() != kPosixPathSeparator)
+  if (path.length() && path[path.size()-1] != kPathSeparator &&
+                       path[path.size()-1] != kPosixPathSeparator)
     filepath += kPathSeparator;
   filepath += filename;
   return filepath;

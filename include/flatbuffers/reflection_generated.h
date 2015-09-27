@@ -36,7 +36,7 @@ enum BaseType {
 };
 
 inline const char **EnumNamesBaseType() {
-  static const char *names[] = { "None", "UType", "Bool", "Byte", "UByte", "Short", "UShort", "Int", "UInt", "Long", "ULong", "Float", "Double", "String", "Vector", "Obj", "Union", nullptr };
+  static const char *names[] = { "None", "UType", "Bool", "Byte", "UByte", "Short", "UShort", "Int", "UInt", "Long", "ULong", "Float", "Double", "String", "Vector", "Obj", "Union", NULL };
   return names;
 }
 
@@ -64,7 +64,7 @@ struct TypeBuilder {
   TypeBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   TypeBuilder &operator=(const TypeBuilder &);
   flatbuffers::Offset<Type> Finish() {
-    auto o = flatbuffers::Offset<Type>(fbb_.EndTable(start_, 3));
+    flatbuffers::Offset<Type> o = flatbuffers::Offset<Type>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
@@ -106,7 +106,7 @@ struct EnumValBuilder {
   EnumValBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   EnumValBuilder &operator=(const EnumValBuilder &);
   flatbuffers::Offset<EnumVal> Finish() {
-    auto o = flatbuffers::Offset<EnumVal>(fbb_.EndTable(start_, 3));
+    flatbuffers::Offset<EnumVal> o = flatbuffers::Offset<EnumVal>(fbb_.EndTable(start_, 3));
     fbb_.Required(o, 4);  // name
     return o;
   }
@@ -127,7 +127,7 @@ struct Enum FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
   bool KeyCompareLessThan(const Enum *o) const { return *name() < *o->name(); }
   int KeyCompareWithValue(const char *val) const { return strcmp(name()->c_str(), val); }
-  const flatbuffers::Vector<flatbuffers::Offset<EnumVal>> *values() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<EnumVal>> *>(6); }
+  const flatbuffers::Vector<flatbuffers::Offset<EnumVal> > *values() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<EnumVal> > *>(6); }
   uint8_t is_union() const { return GetField<uint8_t>(8, 0); }
   const Type *underlying_type() const { return GetPointer<const Type *>(10); }
   bool Verify(flatbuffers::Verifier &verifier) const {
@@ -148,13 +148,13 @@ struct EnumBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(4, name); }
-  void add_values(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<EnumVal>>> values) { fbb_.AddOffset(6, values); }
+  void add_values(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<EnumVal> > > values) { fbb_.AddOffset(6, values); }
   void add_is_union(uint8_t is_union) { fbb_.AddElement<uint8_t>(8, is_union, 0); }
   void add_underlying_type(flatbuffers::Offset<Type> underlying_type) { fbb_.AddOffset(10, underlying_type); }
   EnumBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   EnumBuilder &operator=(const EnumBuilder &);
   flatbuffers::Offset<Enum> Finish() {
-    auto o = flatbuffers::Offset<Enum>(fbb_.EndTable(start_, 4));
+    flatbuffers::Offset<Enum> o = flatbuffers::Offset<Enum>(fbb_.EndTable(start_, 4));
     fbb_.Required(o, 4);  // name
     fbb_.Required(o, 6);  // values
     fbb_.Required(o, 10);  // underlying_type
@@ -164,7 +164,7 @@ struct EnumBuilder {
 
 inline flatbuffers::Offset<Enum> CreateEnum(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<flatbuffers::String> name = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<EnumVal>>> values = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<EnumVal> > > values = 0,
    uint8_t is_union = 0,
    flatbuffers::Offset<Type> underlying_type = 0) {
   EnumBuilder builder_(_fbb);
@@ -219,7 +219,7 @@ struct FieldBuilder {
   FieldBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   FieldBuilder &operator=(const FieldBuilder &);
   flatbuffers::Offset<Field> Finish() {
-    auto o = flatbuffers::Offset<Field>(fbb_.EndTable(start_, 9));
+    flatbuffers::Offset<Field> o = flatbuffers::Offset<Field>(fbb_.EndTable(start_, 9));
     fbb_.Required(o, 4);  // name
     fbb_.Required(o, 6);  // type
     return o;
@@ -275,14 +275,14 @@ struct ObjectBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(4, name); }
-  void add_fields(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Field>>> fields) { fbb_.AddOffset(6, fields); }
+  void add_fields(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Field> > > fields) { fbb_.AddOffset(6, fields); }
   void add_is_struct(uint8_t is_struct) { fbb_.AddElement<uint8_t>(8, is_struct, 0); }
   void add_minalign(int32_t minalign) { fbb_.AddElement<int32_t>(10, minalign, 0); }
   void add_bytesize(int32_t bytesize) { fbb_.AddElement<int32_t>(12, bytesize, 0); }
   ObjectBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   ObjectBuilder &operator=(const ObjectBuilder &);
   flatbuffers::Offset<Object> Finish() {
-    auto o = flatbuffers::Offset<Object>(fbb_.EndTable(start_, 5));
+    flatbuffers::Offset<Object> o = flatbuffers::Offset<Object>(fbb_.EndTable(start_, 5));
     fbb_.Required(o, 4);  // name
     fbb_.Required(o, 6);  // fields
     return o;
@@ -291,7 +291,7 @@ struct ObjectBuilder {
 
 inline flatbuffers::Offset<Object> CreateObject(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<flatbuffers::String> name = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Field>>> fields = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Field> > > fields = 0,
    uint8_t is_struct = 0,
    int32_t minalign = 0,
    int32_t bytesize = 0) {
@@ -331,15 +331,15 @@ struct Schema FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct SchemaBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_objects(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Object>>> objects) { fbb_.AddOffset(4, objects); }
-  void add_enums(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Enum>>> enums) { fbb_.AddOffset(6, enums); }
+  void add_objects(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Object> > > objects) { fbb_.AddOffset(4, objects); }
+  void add_enums(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Enum> > > enums) { fbb_.AddOffset(6, enums); }
   void add_file_ident(flatbuffers::Offset<flatbuffers::String> file_ident) { fbb_.AddOffset(8, file_ident); }
   void add_file_ext(flatbuffers::Offset<flatbuffers::String> file_ext) { fbb_.AddOffset(10, file_ext); }
   void add_root_table(flatbuffers::Offset<Object> root_table) { fbb_.AddOffset(12, root_table); }
   SchemaBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   SchemaBuilder &operator=(const SchemaBuilder &);
   flatbuffers::Offset<Schema> Finish() {
-    auto o = flatbuffers::Offset<Schema>(fbb_.EndTable(start_, 5));
+    flatbuffers::Offset<Schema> o = flatbuffers::Offset<Schema>(fbb_.EndTable(start_, 5));
     fbb_.Required(o, 4);  // objects
     fbb_.Required(o, 6);  // enums
     return o;
@@ -347,8 +347,8 @@ struct SchemaBuilder {
 };
 
 inline flatbuffers::Offset<Schema> CreateSchema(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Object>>> objects = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Enum>>> enums = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Object> > > objects = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Enum> > > enums = 0,
    flatbuffers::Offset<flatbuffers::String> file_ident = 0,
    flatbuffers::Offset<flatbuffers::String> file_ext = 0,
    flatbuffers::Offset<Object> root_table = 0) {

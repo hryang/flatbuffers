@@ -22,7 +22,7 @@
 
 #include "monster_test_generated.h"
 
-#include <random>
+//#include <random>
 
 using namespace flatbuffers;
 using namespace MyGame::Example;
@@ -33,15 +33,17 @@ using namespace MyGame::Example;
     __android_log_print(ANDROID_LOG_INFO, "FlatBuffers", __VA_ARGS__)
   #define FLATBUFFERS_NO_FILE_TESTS
 #else
+#if 0
   #define TEST_OUTPUT_LINE(...) \
     { printf(__VA_ARGS__); printf("\n"); }
+#endif
 #endif
 
 int testing_fails = 0;
 
 void TestFail(const char *expval, const char *val, const char *exp,
               const char *file, int line) {
-  TEST_OUTPUT_LINE("TEST FAILED: %s:%d, %s (%s) != %s", file, line,
+  printf("TEST FAILED: %s:%d, %s (%s) != %s\n", file, line,
                    exp, expval, val);
   assert(0);
   testing_fails++;
@@ -287,7 +289,7 @@ void ParseAndGenerateTextTest() {
 
   if (jsongen != jsonfile) {
     printf("%s----------------\n%s", jsongen.c_str(), jsonfile.c_str());
-    TEST_NOTNULL(NULL);
+    TEST_NOTNULL((void*)NULL);
   }
 }
 
@@ -442,7 +444,7 @@ void ParseProtoTest() {
 
   if (fbs != goldenfile) {
     printf("%s----------------\n%s", fbs.c_str(), goldenfile.c_str());
-    TEST_NOTNULL(NULL);
+    TEST_NOTNULL((void*)NULL);
   }
 }
 
@@ -727,7 +729,7 @@ void FuzzTest2() {
         break;
       }
     }
-    TEST_NOTNULL(NULL);
+    TEST_NOTNULL((void*)NULL);
   }
 
   printf("%dk schema tested with %dk of json\n",
@@ -859,10 +861,10 @@ int main(int /*argc*/, const char * /*argv*/[]) {
   UnicodeTest();
 
   if (!testing_fails) {
-    TEST_OUTPUT_LINE("ALL TESTS PASSED");
+    printf("ALL TESTS PASSED\n");
     return 0;
   } else {
-    TEST_OUTPUT_LINE("%d FAILED TESTS", testing_fails);
+    printf("%d FAILED TESTS\n", testing_fails);
     return 1;
   }
 }

@@ -183,7 +183,7 @@ LanguageParameters language_parameters[] = {
   }
 };
 
-static_assert(sizeof(language_parameters) / sizeof(LanguageParameters) ==
+STATIC_ASSERT(sizeof(language_parameters) / sizeof(LanguageParameters) ==
               GeneratorOptions::kMAX,
               "Please add extra elements to the arrays above.");
 

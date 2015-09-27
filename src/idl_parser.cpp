@@ -39,7 +39,7 @@ const char kTypeSizes[] = {
 
 // The enums in the reflection schema should match the ones we use internally.
 // Compare the last element to check if these go out of sync.
-static_assert(BASE_TYPE_UNION ==
+STATIC_ASSERT(BASE_TYPE_UNION ==
               static_cast<BaseType>(reflection::Union),
               "enums don't match");
 
@@ -50,7 +50,8 @@ static void Error(const std::string &msg) {
 // Ensure that integer values we parse fit inside the declared integer type.
 static void CheckBitsFit(int64_t val, size_t bits) {
   // Bits we allow to be used.
-  int64_t mask = static_cast<int64_t>((1ull << bits) - 1);
+  static const uint64_t kOne = 1;
+  int64_t mask = static_cast<int64_t>((kOne << bits) - 1);
   if (bits < 64 &&
       (val & ~mask) != 0 &&  // Positive or unsigned.
       (val |  mask) != -1)   // Negative.
@@ -883,7 +884,8 @@ void Parser::ParseEnum(bool is_union) {
       if (static_cast<size_t>((*it)->value) >=
            SizeOf(enum_def.underlying_type.base_type) * 8)
         Error("bit flag out of range of underlying integral type");
-      (*it)->value = 1LL << (*it)->value;
+      static const int64_t kOne = 1;
+      (*it)->value = kOne << (*it)->value;
     }
   }
 }
@@ -924,7 +926,7 @@ void CheckClash(const std::vector<FieldDef*> &fields, const StructDef& struct_de
                       field->name);
         }
     }
-};
+}
     
 struct LessField
 {

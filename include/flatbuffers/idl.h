@@ -92,10 +92,30 @@ enum BaseType {
 };
 
 #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE) \
-    static_assert(sizeof(CTYPE) <= sizeof(largest_scalar_t), \
+    STATIC_ASSERT(sizeof(CTYPE) <= sizeof(largest_scalar_t), \
                   "define largest_scalar_t as " #CTYPE);
-  FLATBUFFERS_GEN_TYPES(FLATBUFFERS_TD)
+  //FLATBUFFERS_GEN_TYPES(FLATBUFFERS_TD)
 #undef FLATBUFFERS_TD
+
+// There is no any static_assert implementation in c++03 can pass the above usage.
+// So I have to expand the FLATBUFFERS_GEN_TYPES(FLATBUFFERS_TD) manually.
+STATIC_ASSERT(sizeof(uint8_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint8_t"); 
+STATIC_ASSERT(sizeof(uint8_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint8_t"); 
+STATIC_ASSERT(sizeof(uint8_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint8_t"); 
+STATIC_ASSERT(sizeof(int8_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "int8_t"); 
+STATIC_ASSERT(sizeof(uint8_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint8_t"); 
+STATIC_ASSERT(sizeof(int16_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "int16_t"); 
+STATIC_ASSERT(sizeof(uint16_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint16_t"); 
+STATIC_ASSERT(sizeof(int32_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "int32_t"); 
+STATIC_ASSERT(sizeof(uint32_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint32_t"); 
+STATIC_ASSERT(sizeof(int64_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "int64_t"); 
+STATIC_ASSERT(sizeof(uint64_t) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "uint64_t"); 
+STATIC_ASSERT(sizeof(float) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "float"); 
+STATIC_ASSERT(sizeof(double) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "double"); 
+STATIC_ASSERT(sizeof(Offset<void>) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "Offset<void>"); 
+STATIC_ASSERT(sizeof(Offset<void>) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "Offset<void>"); 
+STATIC_ASSERT(sizeof(Offset<void>) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "Offset<void>"); 
+STATIC_ASSERT(sizeof(Offset<void>) <= sizeof(largest_scalar_t), "define largest_scalar_t as " "Offset<void>");
 
 inline bool IsScalar (BaseType t) { return t >= BASE_TYPE_UTYPE &&
                                            t <= BASE_TYPE_DOUBLE; }
@@ -156,7 +176,7 @@ template<typename T> class SymbolTable {
   }
 
   bool Add(const std::string &name, T *e) {
-    vec.emplace_back(e);
+    vec.push_back(e);
     typename std::map<std::string, T *>::const_iterator it = dict.find(name);
     if (it != dict.end()) return true;
     dict[name] = e;

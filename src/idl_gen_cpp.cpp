@@ -82,7 +82,7 @@ static std::string GenTypePointer(const Parser &parser, const Type &type) {
       return "flatbuffers::String";
     case BASE_TYPE_VECTOR:
       return "flatbuffers::Vector<" +
-             GenTypeWire(parser, type.VectorType(), "", false) + ">";
+             GenTypeWire(parser, type.VectorType(), "", false) + " >";
     case BASE_TYPE_STRUCT: {
       return WrapInNameSpace(parser, *type.struct_def);
     }
@@ -101,7 +101,7 @@ static std::string GenTypeWire(const Parser &parser, const Type &type,
     ? GenTypeBasic(parser, type, real_enum) + postfix
     : IsStruct(type)
       ? "const " + GenTypePointer(parser, type) + " *"
-      : "flatbuffers::Offset<" + GenTypePointer(parser, type) + ">" + postfix;
+      : "flatbuffers::Offset<" + GenTypePointer(parser, type) + " >" + postfix;
 }
 
 // Return a C++ type for any type (scalar/pointer) that reflects its
@@ -374,7 +374,7 @@ static void GenTable(const Parser &parser, StructDef &struct_def,
       code += ") { fbb_.Add";
       if (IsScalar(field.value.type.base_type)) {
         code += "Element<" + GenTypeWire(parser, field.value.type, "", false);
-        code += ">";
+        code += " >";
       } else if (IsStruct(field.value.type)) {
         code += "Struct";
       } else {
@@ -393,7 +393,8 @@ static void GenTable(const Parser &parser, StructDef &struct_def,
   code += "  " + struct_def.name + "Builder &operator=(const ";
   code += struct_def.name + "Builder &);\n";
   code += "  flatbuffers::Offset<" + struct_def.name;
-  code += "> Finish() {\n    auto o = flatbuffers::Offset<" + struct_def.name;
+  code += "> Finish() {\n    flatbuffers::Offset<" + struct_def.name;
+  code += "> o = flatbuffers::Offset<" + struct_def.name;
   code += ">(fbb_.EndTable(start_, ";
   code += NumToString(struct_def.fields.vec.size()) + "));\n";
   for (std::vector<FieldDef *>::const_iterator it = struct_def.fields.vec.begin();
@@ -454,7 +455,7 @@ static void GenTable(const Parser &parser, StructDef &struct_def,
 }
 
 static void GenPadding(const FieldDef &field,
-                       const std::function<void (int bits)> &f) {
+                       const std::tr1::function<void (int bits)> &f) {
   if (field.padding) {
     for (int i = 0; i < 4; i++)
       if (static_cast<int>(field.padding) & (1 << i))
@@ -633,6 +634,11 @@ void CloseNestedNameSpaces(Namespace *ns, std::string *code_ptr) {
 
 }  // namespace cpp
 
+static bool NonAlnum(char c)
+{
+    return !isalnum(c);
+}
+
 // Iterate through all definitions we haven't generate code for (enums, structs,
 // and tables) and output them to a single file.
 std::string GenerateCPP(const Parser &parser,
@@ -704,7 +710,8 @@ std::string GenerateCPP(const Parser &parser,
     include_guard_ident.erase(
       std::remove_if(include_guard_ident.begin(),
                      include_guard_ident.end(),
-                     [](char c) { return !isalnum(c); }),
+                     NonAlnum),
+                     //[](char c) { return !isalnum(c); }),
       include_guard_ident.end());
     std::string include_guard = "FLATBUFFERS_GENERATED_" + include_guard_ident;
     include_guard += "_";

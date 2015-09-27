@@ -19,23 +19,73 @@
 
 #include <assert.h>
 
-#include <cstdint>
+#include <stdint.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <string>
-#include <type_traits>
+#include <tr1/type_traits>
 #include <vector>
 #include <algorithm>
-#include <functional>
-#include <memory>
+#include <tr1/functional>
+#include <tr1/memory>
 
 #if __cplusplus <= 199711L && \
     (!defined(_MSC_VER) || _MSC_VER < 1600) && \
     (!defined(__GNUC__) || \
       (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__ < 40603))
-  #error A C++11 compatible compiler is required for FlatBuffers.
-  #error __cplusplus _MSC_VER __GNUC__  __GNUC_MINOR__  __GNUC_PATCHLEVEL__
+  //#error A C++11 compatible compiler is required for FlatBuffers.
+  //#error __cplusplus _MSC_VER __GNUC__  __GNUC_MINOR__  __GNUC_PATCHLEVEL__
+
+#define CONCATENATE(arg1, arg2)   CONCATENATE1(arg1, arg2)
+#define CONCATENATE1(arg1, arg2)  CONCATENATE2(arg1, arg2)
+#define CONCATENATE2(arg1, arg2)  arg1##arg2
+
+/**
+ * Usage:
+ *
+ * <code>STATIC_ASSERT(expression, message)</code>
+ *
+ * When the static assertion test fails, a compiler error message that somehow
+ * contains the "STATIC_ASSERTION_FAILED_AT_LINE_xxx_message" is generated.
+ *
+ * /!\ message has to be a valid C++ identifier, that is to say it must not
+ * contain space characters, cannot start with a digit, etc.
+ *
+ * STATIC_ASSERT(true, this_message_will_never_be_displayed);
+ */
+
+#define STATIC_ASSERT(expression, message)\
+  struct CONCATENATE(__static_assertion_at_line_, __LINE__)\
+  {\
+    static_assert_impl::StaticAssertion<static_cast<bool>((expression))> CONCATENATE(CONCATENATE(CONCATENATE(STATIC_ASSERTION_FAILED_AT_LINE_, __LINE__), _), null_msg);\
+  };\
+  typedef static_assert_impl::StaticAssertionTest<sizeof(CONCATENATE(__static_assertion_at_line_, __LINE__))> CONCATENATE(__static_assertion_test_at_line_, __LINE__)
+
+  // note that we wrap the non existing type inside a struct to avoid warning
+  // messages about unused variables when static assertions are used at function
+  // scope
+  // the use of sizeof makes sure the assertion error is not ignored by SFINAE
+
+namespace static_assert_impl {
+
+  template <bool>
+  struct StaticAssertion;
+
+  template <>
+  struct StaticAssertion<true>
+  {
+  }; // StaticAssertion<true>
+
+  template<int i>
+  struct StaticAssertionTest
+  {
+  }; // StaticAssertionTest<int>
+
+} // namespace static_assert_impl
+
+#else
+  #define STATIC_ASSERT(cond, msg) static_assert(cond, msg)
 #endif
 
 // The wire format uses a little endian encoding (since that's efficient for
@@ -88,7 +138,7 @@ typedef uint16_t voffset_t;
 typedef uintmax_t largest_scalar_t;
 
 // Pointer to relinquished memory.
-typedef std::shared_ptr<uint8_t> unique_ptr_t;
+typedef std::tr1::shared_ptr<uint8_t> unique_ptr_t;
     
 
 // Wrapper for uoffset_t to allow safe template specialization.
@@ -154,7 +204,7 @@ template<typename T> size_t AlignOf() {
   #ifdef _MSC_VER
     return __alignof(T);
   #else
-    return alignof(T);
+    return __alignof__(T);
   #endif
 }
 
@@ -191,30 +241,20 @@ template<typename T> struct IndirectHelper<const T *> {
 
 // An STL compatible iterator implementation for Vector below, effectively
 // calling Get() for every element.
-template<typename T, bool bConst>
+template<typename T>
 struct VectorIterator : public
   std::iterator < std::input_iterator_tag,
-  typename std::conditional < bConst,
-  const typename IndirectHelper<T>::return_type,
-  typename IndirectHelper<T>::return_type > ::type, uoffset_t > {
+  typename IndirectHelper<T>::return_type, uoffset_t > {
 
   typedef std::iterator<std::input_iterator_tag,
-    typename std::conditional<bConst,
-    const typename IndirectHelper<T>::return_type,
-    typename IndirectHelper<T>::return_type>::type, uoffset_t> super_type;
+    typename IndirectHelper<T>::return_type, uoffset_t> super_type;
 
 public:
   VectorIterator(const uint8_t *data, uoffset_t i) :
       data_(data + IndirectHelper<T>::element_stride * i) {};
   VectorIterator(const VectorIterator &other) : data_(other.data_) {}
-  VectorIterator(VectorIterator &&other) : data_(std::move(other.data_)) {}
 
   VectorIterator &operator=(const VectorIterator &other) {
-    data_ = other.data_;
-    return *this;
-  }
-
-  VectorIterator &operator=(VectorIterator &&other) {
     data_ = other.data_;
     return *this;
   }
@@ -254,12 +294,67 @@ private:
   const uint8_t *data_;
 };
 
+template<typename T>
+struct VectorConstIterator : public
+  std::iterator < std::input_iterator_tag,
+  const typename IndirectHelper<T>::return_type,
+  uoffset_t > {
+
+  typedef std::iterator<std::input_iterator_tag,
+    const typename IndirectHelper<T>::return_type,
+    uoffset_t> super_type;
+
+public:
+  VectorConstIterator(const uint8_t *data, uoffset_t i) :
+      data_(data + IndirectHelper<T>::element_stride * i) {};
+  VectorConstIterator(const VectorConstIterator &other) : data_(other.data_) {}
+
+  VectorConstIterator &operator=(const VectorConstIterator &other) {
+    data_ = other.data_;
+    return *this;
+  }
+
+  bool operator==(const VectorConstIterator& other) const {
+    return data_ == other.data_;
+  }
+
+  bool operator!=(const VectorConstIterator& other) const {
+    return data_ != other.data_;
+  }
+
+  ptrdiff_t operator-(const VectorConstIterator& other) const {
+    return (data_ - other.data_) / IndirectHelper<T>::element_stride;
+  }
+
+  typename super_type::value_type operator *() const {
+    return IndirectHelper<T>::Read(data_, 0);
+  }
+
+  typename super_type::value_type operator->() const {
+    return IndirectHelper<T>::Read(data_, 0);
+  }
+
+  VectorConstIterator &operator++() {
+    data_ += IndirectHelper<T>::element_stride;
+    return *this;
+  }
+
+  VectorConstIterator operator++(int) {
+    VectorConstIterator temp(data_);
+    data_ += IndirectHelper<T>::element_stride;
+    return temp;
+  }
+
+private:
+  const uint8_t *data_;
+};
+
 // This is used as a helper type for accessing vectors.
 // Vector::data() assumes the vector elements start after the length field.
 template<typename T> class Vector {
 public:
-  typedef VectorIterator<T, false> iterator;
-  typedef VectorIterator<T, true> const_iterator;
+  typedef VectorIterator<T> iterator;
+  typedef VectorConstIterator<T> const_iterator;
 
   uoffset_t size() const { return EndianScalar(length_); }
 
@@ -424,8 +519,8 @@ class vector_downward {
   // Relinquish the pointer to the caller.
   unique_ptr_t release() {
     // Actually deallocate from the start of the allocated memory.
-    std::function<void(uint8_t *)> deleter(
-      std::bind(&simple_allocator::deallocate, allocator_, buf_));
+    std::tr1::function<void(uint8_t *)> deleter(
+      std::tr1::bind(&simple_allocator::deallocate, allocator_, buf_));
 
     // Point to the desired offset.
     unique_ptr_t retval(data(), deleter);
@@ -570,7 +665,7 @@ class FlatBufferBuilder FLATBUFFERS_FINAL_CLASS {
 
   template<typename T> void AssertScalarT() {
     // The code assumes power of 2 sizes and endian-swap-ability.
-    static_assert(std::is_scalar<T>::value
+    STATIC_ASSERT(std::tr1::is_scalar<T>::value
         // The Offset<T> type is essentially a scalar but fails is_scalar.
         || sizeof(T) == sizeof(Offset<void>),
            "T must be a scalar type");
@@ -1162,14 +1257,14 @@ inline int LookupEnum(const char **names, const char *name) {
     struct __declspec(align(alignment))
   #define STRUCT_END(name, size) \
     __pragma(pack()); \
-    static_assert(sizeof(name) == size, "compiler breaks packing rules")
+    STATIC_ASSERT(sizeof(name) == size, "compiler breaks packing rules")
 #elif defined(__GNUC__) || defined(__clang__)
   #define MANUALLY_ALIGNED_STRUCT(alignment) \
     _Pragma("pack(1)") \
     struct __attribute__((aligned(alignment)))
   #define STRUCT_END(name, size) \
     _Pragma("pack()") \
-    static_assert(sizeof(name) == size, "compiler breaks packing rules")
+    STATIC_ASSERT(sizeof(name) == size, "compiler breaks packing rules")
 #else
   #error Unknown compiler, please define structure alignment macros
 #endif
