@@ -150,22 +150,22 @@ struct Value {
 template<typename T> class SymbolTable {
  public:
   ~SymbolTable() {
-    for (auto it = vec.begin(); it != vec.end(); ++it) {
+      for (typename std::vector<T*>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
       delete *it;
     }
   }
 
   bool Add(const std::string &name, T *e) {
     vec.emplace_back(e);
-    auto it = dict.find(name);
+    typename std::map<std::string, T *>::const_iterator it = dict.find(name);
     if (it != dict.end()) return true;
     dict[name] = e;
     return false;
   }
 
   T *Lookup(const std::string &name) const {
-    auto it = dict.find(name);
-    return it == dict.end() ? nullptr : it->second;
+    typename std::map<std::string, T *>::const_iterator it = dict.find(name);
+    return it == dict.end() ? NULL : it->second;
   }
 
  private:
@@ -224,7 +224,7 @@ struct StructDef : public Definition {
     {}
 
   void PadLastField(size_t min_align) {
-    auto padding = PaddingBytes(bytesize, min_align);
+    size_t padding = PaddingBytes(bytesize, min_align);
     bytesize += padding;
     if (fields.vec.size()) fields.vec.back()->padding = padding;
   }
@@ -268,14 +268,14 @@ struct EnumDef : public Definition {
   EnumDef() : is_union(false) {}
 
   EnumVal *ReverseLookup(int enum_idx, bool skip_union_default = true) {
-    for (auto it = vals.vec.begin() + static_cast<int>(is_union &&
+      for (std::vector<EnumVal *>::const_iterator it = vals.vec.begin() + static_cast<int>(is_union &&
                                                        skip_union_default);
              it != vals.vec.end(); ++it) {
       if ((*it)->value == enum_idx) {
         return *it;
       }
     }
-    return nullptr;
+    return NULL;
   }
 
   Offset<reflection::Enum> Serialize(FlatBufferBuilder *builder) const;
@@ -288,9 +288,9 @@ struct EnumDef : public Definition {
 class Parser {
  public:
   Parser(bool strict_json = false, bool proto_mode = false)
-    : root_struct_def_(nullptr),
-      source_(nullptr),
-      cursor_(nullptr),
+    : root_struct_def_(NULL),
+      source_(NULL),
+      cursor_(NULL),
       line_(1),
       proto_mode_(proto_mode),
       strict_json_(strict_json) {
@@ -308,7 +308,7 @@ class Parser {
   }
 
   ~Parser() {
-    for (auto it = namespaces_.begin(); it != namespaces_.end(); ++it) {
+      for (std::vector<Namespace *>::const_iterator it = namespaces_.begin(); it != namespaces_.end(); ++it) {
       delete *it;
     }
   }

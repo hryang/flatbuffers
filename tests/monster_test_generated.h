@@ -113,7 +113,7 @@ struct TestSimpleTableWithEnumBuilder {
   TestSimpleTableWithEnumBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
   flatbuffers::Offset<TestSimpleTableWithEnum> Finish() {
-    auto o = flatbuffers::Offset<TestSimpleTableWithEnum>(fbb_.EndTable(start_, 1));
+    flatbuffers::Offset<TestSimpleTableWithEnum> o = flatbuffers::Offset<TestSimpleTableWithEnum>(fbb_.EndTable(start_, 1));
     return o;
   }
 };
@@ -151,7 +151,7 @@ struct StatBuilder {
   StatBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   StatBuilder &operator=(const StatBuilder &);
   flatbuffers::Offset<Stat> Finish() {
-    auto o = flatbuffers::Offset<Stat>(fbb_.EndTable(start_, 3));
+    flatbuffers::Offset<Stat> o = flatbuffers::Offset<Stat>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
@@ -293,7 +293,7 @@ struct MonsterBuilder {
   MonsterBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MonsterBuilder &operator=(const MonsterBuilder &);
   flatbuffers::Offset<Monster> Finish() {
-    auto o = flatbuffers::Offset<Monster>(fbb_.EndTable(start_, 25));
+    flatbuffers::Offset<Monster> o = flatbuffers::Offset<Monster>(fbb_.EndTable(start_, 25));
     fbb_.Required(o, 10);  // name
     return o;
   }

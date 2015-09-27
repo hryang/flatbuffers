@@ -45,7 +45,7 @@
 		AB70F1FBA50E4120BCF37C8D /* monster_test_generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = monster_test_generated.h; path = tests/monster_test_generated.h; sourceTree = SOURCE_ROOT; };
 		C0E7B66C3FF849A0AD9A7168 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = util.h; path = include/flatbuffers/util.h; sourceTree = SOURCE_ROOT; };
 		CD90A7F6B2BE4D0384294DD1 /* idl_gen_cpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = idl_gen_cpp.cpp; path = src/idl_gen_cpp.cpp; sourceTree = SOURCE_ROOT; };
-		DD8B353D4756412195777FBA /* flatbuffers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = flatbuffers.h; path = include/flatbuffers/flatbuffers.h; sourceTree = SOURCE_ROOT; };
+		DD8B353D4756412195777FBA /* flatbuffers.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = flatbuffers.h; path = include/flatbuffers/flatbuffers.h; sourceTree = SOURCE_ROOT; };
 		ECCEBFFA6977404F858F9739 /* sample_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sample_text.cpp; path = samples/sample_text.cpp; sourceTree = SOURCE_ROOT; };
 		F6C5D81DBF864365B12E269D /* idl_gen_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = idl_gen_text.cpp; path = src/idl_gen_text.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */

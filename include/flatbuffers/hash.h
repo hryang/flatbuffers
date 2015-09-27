@@ -86,7 +86,7 @@ inline NamedHashFunction<uint32_t>::HashFunction FindHashFunction32(
       return kHashFunctions32[i].function;
     }
   }
-  return nullptr;
+  return NULL;
 }
 
 inline NamedHashFunction<uint64_t>::HashFunction FindHashFunction64(
@@ -97,7 +97,7 @@ inline NamedHashFunction<uint64_t>::HashFunction FindHashFunction64(
       return kHashFunctions64[i].function;
     }
   }
-  return nullptr;
+  return NULL;
 }
 
 }  // namespace flatbuffers

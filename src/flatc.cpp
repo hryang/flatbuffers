@@ -185,7 +185,7 @@ int main(int argc, const char *argv[]) {
 
   // Now process the files:
   flatbuffers::Parser parser(opts.strict_json, proto_mode);
-  for (auto file_it = filenames.begin();
+    for (std::vector<std::string>::const_iterator file_it = filenames.begin();
             file_it != filenames.end();
           ++file_it) {
       std::string contents;
@@ -220,7 +220,7 @@ int main(int argc, const char *argv[]) {
           }
         }
       } else {
-        auto local_include_directory = flatbuffers::StripFileName(*file_it);
+        std::string local_include_directory = flatbuffers::StripFileName(*file_it);
         include_directories.push_back(local_include_directory.c_str());
         include_directories.push_back(nullptr);
         if (!parser.Parse(contents.c_str(), &include_directories[0],

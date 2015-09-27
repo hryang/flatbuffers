@@ -53,18 +53,18 @@ void GenComment(const std::vector<std::string> &dc, std::string *code_ptr,
   }
 
   std::string &code = *code_ptr;
-  if (config != nullptr && config->first_line != nullptr) {
+  if (config != NULL && config->first_line != NULL) {
     code += std::string(prefix) + std::string(config->first_line) + "\n";
   }
   std::string line_prefix = std::string(prefix) +
-      ((config != nullptr && config->content_line_prefix != nullptr) ?
+      ((config != NULL && config->content_line_prefix != NULL) ?
        config->content_line_prefix : "///");
-  for (auto it = dc.begin();
+    for (std::vector<std::string>::const_iterator it = dc.begin();
        it != dc.end();
        ++it) {
     code += line_prefix + *it + "\n";
   }
-  if (config != nullptr && config->last_line != nullptr) {
+  if (config != NULL && config->last_line != NULL) {
     code += std::string(prefix) + std::string(config->last_line) + "\n";
   }
 }
@@ -428,10 +428,10 @@ static void GenEnum(const LanguageParameters &lang, EnumDef &enum_def,
   if (lang.language == GeneratorOptions::kJava) {
     code += "  private " + enum_def.name + "() { }\n";
   }
-  for (auto it = enum_def.vals.vec.begin();
+    for (std::vector<EnumVal*>::const_iterator it = enum_def.vals.vec.begin();
        it != enum_def.vals.vec.end();
        ++it) {
-    auto &ev = **it;
+    EnumVal &ev = **it;
     GenComment(ev.doc_comment, code_ptr, &lang.comment_config, "  ");
     if (lang.language != GeneratorOptions::kCSharp) {
       code += "  public static";
@@ -449,7 +449,7 @@ static void GenEnum(const LanguageParameters &lang, EnumDef &enum_def,
     // Problem is, if values are very sparse that could generate really big
     // tables. Ideally in that case we generate a map lookup instead, but for
     // the moment we simply don't output a table at all.
-    auto range = enum_def.vals.vec.back()->value -
+    int64_t range = enum_def.vals.vec.back()->value -
       enum_def.vals.vec.front()->value + 1;
     // Average distance between values above which we consider a table
     // "too sparse". Change at will.
@@ -459,8 +459,8 @@ static void GenEnum(const LanguageParameters &lang, EnumDef &enum_def,
       code += lang.const_decl;
       code += lang.string_type;
       code += "[] names = { ";
-      auto val = enum_def.vals.vec.front()->value;
-      for (auto it = enum_def.vals.vec.begin();
+      int64_t val = enum_def.vals.vec.front()->value;
+      for (std::vector<EnumVal*>::const_iterator it = enum_def.vals.vec.begin();
         it != enum_def.vals.vec.end();
         ++it) {
         while (val++ != (*it)->value) code += "\"\", ";
@@ -530,10 +530,10 @@ static void GenStructArgs(const LanguageParameters &lang,
                           const StructDef &struct_def,
                           std::string *code_ptr, const char *nameprefix) {
   std::string &code = *code_ptr;
-  for (auto it = struct_def.fields.vec.begin();
+  for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
        it != struct_def.fields.vec.end();
        ++it) {
-    auto &field = **it;
+    FieldDef &field = **it;
     if (IsStruct(field.value.type)) {
       // Generate arguments for a struct inside a struct. To ensure names
       // don't clash, and to make it obvious these arguments are constructing
@@ -561,9 +561,9 @@ static void GenStructBody(const LanguageParameters &lang,
   code += "    builder." + FunctionStart(lang, 'P') + "rep(";
   code += NumToString(struct_def.minalign) + ", ";
   code += NumToString(struct_def.bytesize) + ");\n";
-  for (auto it = struct_def.fields.vec.rbegin();
+  for (std::vector<FieldDef*>::const_reverse_iterator it = struct_def.fields.vec.rbegin();
        it != struct_def.fields.vec.rend(); ++it) {
-    auto &field = **it;
+    FieldDef &field = **it;
     if (field.padding) {
       code += "    builder." + FunctionStart(lang, 'P') + "ad(";
       code += NumToString(field.padding) + ");\n";
@@ -574,7 +574,7 @@ static void GenStructBody(const LanguageParameters &lang,
     } else {
       code += "    builder." + FunctionStart(lang, 'P') + "ut";
       code += GenMethod(lang, field.value.type) + "(";
-      auto argname = nameprefix + MakeCamel(field.name, lang.first_camel_upper);
+        std::string argname = nameprefix + MakeCamel(field.name, lang.first_camel_upper);
       code += DestinationValue(lang, argname, field.value.type);
       code += ");\n";
     }
@@ -633,10 +633,10 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
   code += "  public " + struct_def.name;
   code += " __init(int _i, ByteBuffer _bb) ";
   code += "{ bb_pos = _i; bb = _bb; return this; }\n\n";
-  for (auto it = struct_def.fields.vec.begin();
+  for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
        it != struct_def.fields.vec.end();
        ++it) {
-    auto &field = **it;
+    FieldDef &field = **it;
     if (field.deprecated) continue;
     GenComment(field.doc_comment, code_ptr, &lang.comment_config, "  ");
     std::string type_name = GenTypeGet(lang, field.value.type);
@@ -649,7 +649,7 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
 
     // Most field accessors need to retrieve and test the field offset first,
     // this is the prefix code for that:
-    auto offset_prefix = " { int o = __offset(" +
+      std::string offset_prefix = " { int o = __offset(" +
       NumToString(field.value.offset) +
       "); return o != 0 ? ";
     // Generate the accessors that don't do object reuse.
@@ -734,14 +734,14 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
           code += offset_prefix + getter + "(o + bb_pos) : null";
           break;
         case BASE_TYPE_VECTOR: {
-          auto vectortype = field.value.type.VectorType();
+          Type vectortype = field.value.type.VectorType();
           code += "(";
           if (vectortype.base_type == BASE_TYPE_STRUCT) {
             code += type_name + " obj, ";
             getter = "obj.__init";
           }
           code += "int j)" + offset_prefix + getter +"(";
-          auto index = "__vector(o) + j * " +
+            std::string index = "__vector(o) + j * " +
                        NumToString(InlineSize(vectortype));
           if (vectortype.base_type == BASE_TYPE_STRUCT) {
             code += vectortype.struct_def->fixed
@@ -793,17 +793,17 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
 
     // generate mutators for scalar fields or vectors of scalars
     if (opts.mutable_buffer) {
-      auto underlying_type = field.value.type.base_type == BASE_TYPE_VECTOR
+      Type underlying_type = field.value.type.base_type == BASE_TYPE_VECTOR
                     ? field.value.type.VectorType()
                     : field.value.type;
       // boolean parameters have to be explicitly converted to byte representation
-      auto setter_parameter = underlying_type.base_type == BASE_TYPE_BOOL ? "(byte)(" + field.name + " ? 1 : 0)" : field.name;
-      auto mutator_prefix = MakeCamel("mutate", lang.first_camel_upper);
+        std::string setter_parameter = underlying_type.base_type == BASE_TYPE_BOOL ? "(byte)(" + field.name + " ? 1 : 0)" : field.name;
+        std::string mutator_prefix = MakeCamel("mutate", lang.first_camel_upper);
       //a vector mutator also needs the index of the vector element it should mutate
-      auto mutator_params = (field.value.type.base_type == BASE_TYPE_VECTOR ? "(int j, " : "(") +
+        std::string mutator_params = (field.value.type.base_type == BASE_TYPE_VECTOR ? "(int j, " : "(") +
                             GenTypeNameDest(lang, underlying_type) + " " + 
                             field.name + ") { ";
-      auto setter_index = field.value.type.base_type == BASE_TYPE_VECTOR
+        std::string setter_index = field.value.type.base_type == BASE_TYPE_VECTOR
                     ? "__vector(o) + j * " + NumToString(InlineSize(underlying_type))
                     : (struct_def.fixed ? "bb_pos + " + NumToString(field.value.offset) : "o + bb_pos");
       
@@ -844,9 +844,9 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
     // inline, and there's no way to do so in Java.
     bool has_no_struct_fields = true;
     int num_fields = 0;
-    for (auto it = struct_def.fields.vec.begin();
+    for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
-      auto &field = **it;
+      FieldDef &field = **it;
       if (field.deprecated) continue;
       if (IsStruct(field.value.type)) {
         has_no_struct_fields = false;
@@ -860,9 +860,9 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
       code += "  public static " + GenOffsetType(lang, struct_def) + " ";
       code += FunctionStart(lang, 'C') + "reate" + struct_def.name;
       code += "(FlatBufferBuilder builder";
-      for (auto it = struct_def.fields.vec.begin();
+      for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
-        auto &field = **it;
+        FieldDef &field = **it;
         if (field.deprecated) continue;
         code += ",\n      ";
         code += GenTypeForUser(lang,
@@ -889,9 +889,9 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
       for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
            size;
            size /= 2) {
-        for (auto it = struct_def.fields.vec.rbegin();
+        for (std::vector<FieldDef*>::const_reverse_iterator it = struct_def.fields.vec.rbegin();
              it != struct_def.fields.vec.rend(); ++it) {
-          auto &field = **it;
+          FieldDef &field = **it;
           if (!field.deprecated &&
               (!struct_def.sortbysize ||
                size == SizeOf(field.value.type.base_type))) {
@@ -915,16 +915,16 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
     code += "(FlatBufferBuilder builder) { builder.";
     code += FunctionStart(lang, 'S') + "tartObject(";
     code += NumToString(struct_def.fields.vec.size()) + "); }\n";
-    for (auto it = struct_def.fields.vec.begin();
+    for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
-      auto &field = **it;
+      FieldDef &field = **it;
       if (field.deprecated) continue;
       code += "  public static void " + FunctionStart(lang, 'A') + "dd";
       code += MakeCamel(field.name);
       code += "(FlatBufferBuilder builder, ";
       code += GenTypeForUser(lang,
                              DestinationType(lang, field.value.type, false));
-      auto argname = MakeCamel(field.name, false);
+        std::string argname = MakeCamel(field.name, false);
       if (!IsScalar(field.value.type.base_type)) argname += "Offset";
       code += " " + argname + ") { builder." + FunctionStart(lang, 'A') + "dd";
       code += GenMethod(lang, field.value.type) + "(";
@@ -936,9 +936,9 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
       code += ", " + GenDefaultValue(lang, field.value, true);
       code += "); }\n";
       if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-        auto vector_type = field.value.type.VectorType();
-        auto alignment = InlineAlignment(vector_type);
-        auto elem_size = InlineSize(vector_type);
+        Type vector_type = field.value.type.VectorType();
+        size_t alignment = InlineAlignment(vector_type);
+        size_t elem_size = InlineSize(vector_type);
         if (!IsStruct(vector_type)) {
           // Generate a method to create a vector from a Java array.
           code += "  public static " + GenVectorOffsetType(lang) + " " + FunctionStart(lang, 'C') + "reate";
@@ -974,10 +974,10 @@ static void GenStruct(const LanguageParameters &lang, const Parser &parser,
     code += FunctionStart(lang, 'E') + "nd" + struct_def.name;
     code += "(FlatBufferBuilder builder) {\n    int o = builder.";
     code += FunctionStart(lang, 'E') + "ndObject();\n";
-    for (auto it = struct_def.fields.vec.begin();
+    for (std::vector<FieldDef*>::const_iterator it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end();
          ++it) {
-      auto &field = **it;
+      FieldDef &field = **it;
       if (!field.deprecated && field.required) {
         code += "    builder." + FunctionStart(lang, 'R') + "equired(o, ";
         code += NumToString(field.value.offset);
@@ -1011,8 +1011,8 @@ static bool SaveClass(const LanguageParameters &lang, const Parser &parser,
 
   std::string namespace_general;
   std::string namespace_dir = path;  // Either empty or ends in separator.
-  auto &namespaces = parser.namespaces_.back()->components;
-  for (auto it = namespaces.begin(); it != namespaces.end(); ++it) {
+    const std::vector<std::string> &namespaces = parser.namespaces_.back()->components;
+    for (std::vector<std::string>::const_iterator it = namespaces.begin(); it != namespaces.end(); ++it) {
     if (namespace_general.length()) {
       namespace_general += ".";
     }
@@ -1032,7 +1032,7 @@ static bool SaveClass(const LanguageParameters &lang, const Parser &parser,
   if (needs_includes) code += lang.includes;
   code += classcode;
   if (!namespace_general.empty()) code += lang.namespace_end;
-  auto filename = namespace_dir + defname + lang.file_extension;
+    std::string filename = namespace_dir + defname + lang.file_extension;
   return SaveFile(filename.c_str(), code, false);
 }
 
@@ -1042,10 +1042,10 @@ bool GenerateGeneral(const Parser &parser,
                      const GeneratorOptions &opts) {
 
   assert(opts.lang <= GeneratorOptions::kMAX);
-  auto lang = language_parameters[opts.lang];
+  const LanguageParameters& lang = language_parameters[opts.lang];
   std::string one_file_code;
 
-  for (auto it = parser.enums_.vec.begin();
+  for (std::vector<EnumDef*>::const_iterator it = parser.enums_.vec.begin();
        it != parser.enums_.vec.end(); ++it) {
     std::string enumcode;
     GenEnum(lang, **it, &enumcode);
@@ -1058,7 +1058,7 @@ bool GenerateGeneral(const Parser &parser,
     }
   }
 
-  for (auto it = parser.structs_.vec.begin();
+  for (std::vector<StructDef*>::const_iterator it = parser.structs_.vec.begin();
        it != parser.structs_.vec.end(); ++it) {
     std::string declcode;
     GenStruct(lang, parser, **it, opts, &declcode);
@@ -1082,8 +1082,8 @@ static std::string ClassFileName(const LanguageParameters &lang,
                                  const std::string &path) {
   std::string namespace_general;
   std::string namespace_dir = path;
-  auto &namespaces = parser.namespaces_.back()->components;
-  for (auto it = namespaces.begin(); it != namespaces.end(); ++it) {
+    const std::vector<std::string> &namespaces = parser.namespaces_.back()->components;
+    for (std::vector<std::string>::const_iterator it = namespaces.begin(); it != namespaces.end(); ++it) {
     if (namespace_general.length()) {
       namespace_general += ".";
       namespace_dir += kPathSeparator;
@@ -1100,18 +1100,18 @@ std::string GeneralMakeRule(const Parser &parser,
                             const std::string &file_name,
                             const GeneratorOptions &opts) {
   assert(opts.lang <= GeneratorOptions::kMAX);
-  auto lang = language_parameters[opts.lang];
+  const LanguageParameters& lang = language_parameters[opts.lang];
 
   std::string make_rule;
 
-  for (auto it = parser.enums_.vec.begin();
+  for (std::vector<EnumDef*>::const_iterator it = parser.enums_.vec.begin();
        it != parser.enums_.vec.end(); ++it) {
     if (make_rule != "")
       make_rule += " ";
     make_rule += ClassFileName(lang, parser, **it, path);
   }
 
-  for (auto it = parser.structs_.vec.begin();
+  for (std::vector<StructDef*>::const_iterator it = parser.structs_.vec.begin();
        it != parser.structs_.vec.end(); ++it) {
     if (make_rule != "")
       make_rule += " ";
@@ -1119,8 +1119,8 @@ std::string GeneralMakeRule(const Parser &parser,
   }
 
   make_rule += ": ";
-  auto included_files = parser.GetIncludedFilesRecursive(file_name);
-  for (auto it = included_files.begin();
+    std::set<std::string> included_files = parser.GetIncludedFilesRecursive(file_name);
+    for (std::set<std::string>::const_iterator it = included_files.begin();
        it != included_files.end(); ++it) {
     make_rule += " " + *it;
   }
@@ -1130,7 +1130,7 @@ std::string GeneralMakeRule(const Parser &parser,
 std::string BinaryFileName(const Parser &parser,
                            const std::string &path,
                            const std::string &file_name) {
-  auto ext = parser.file_extension_.length() ? parser.file_extension_ : "bin";
+    std::string ext = parser.file_extension_.length() ? parser.file_extension_ : "bin";
   return path + file_name + "." + ext;
 }
 
@@ -1155,9 +1155,9 @@ std::string BinaryMakeRule(const Parser &parser,
       flatbuffers::StripExtension(file_name));
   std::string make_rule = BinaryFileName(parser, path, filebase) + ": " +
       file_name;
-  auto included_files = parser.GetIncludedFilesRecursive(
+  std::set<std::string> included_files = parser.GetIncludedFilesRecursive(
       parser.root_struct_def_->file);
-  for (auto it = included_files.begin();
+    for (std::set<std::string>::const_iterator it = included_files.begin();
        it != included_files.end(); ++it) {
     make_rule += " " + *it;
   }

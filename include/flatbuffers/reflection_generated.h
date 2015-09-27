@@ -253,7 +253,7 @@ struct Object FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
   bool KeyCompareLessThan(const Object *o) const { return *name() < *o->name(); }
   int KeyCompareWithValue(const char *val) const { return strcmp(name()->c_str(), val); }
-  const flatbuffers::Vector<flatbuffers::Offset<Field>> *fields() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Field>> *>(6); }
+  const flatbuffers::Vector<flatbuffers::Offset<Field> > *fields() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Field> > *>(6); }
   uint8_t is_struct() const { return GetField<uint8_t>(8, 0); }
   int32_t minalign() const { return GetField<int32_t>(10, 0); }
   int32_t bytesize() const { return GetField<int32_t>(12, 0); }
@@ -305,8 +305,8 @@ inline flatbuffers::Offset<Object> CreateObject(flatbuffers::FlatBufferBuilder &
 }
 
 struct Schema FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::Vector<flatbuffers::Offset<Object>> *objects() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Object>> *>(4); }
-  const flatbuffers::Vector<flatbuffers::Offset<Enum>> *enums() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Enum>> *>(6); }
+  const flatbuffers::Vector<flatbuffers::Offset<Object> > *objects() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Object> > *>(4); }
+  const flatbuffers::Vector<flatbuffers::Offset<Enum> > *enums() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Enum> > *>(6); }
   const flatbuffers::String *file_ident() const { return GetPointer<const flatbuffers::String *>(8); }
   const flatbuffers::String *file_ext() const { return GetPointer<const flatbuffers::String *>(10); }
   const Object *root_table() const { return GetPointer<const Object *>(12); }

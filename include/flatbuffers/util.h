@@ -63,9 +63,9 @@ template<> inline std::string NumToString<double>(double t) {
   std::stringstream ss;
   // Use std::fixed to surpress scientific notation.
   ss << std::fixed << t;
-  auto s = ss.str();
+    std::string s = ss.str();
   // Sadly, std::fixed turns "1" into "1.00000", so here we undo that.
-  auto p = s.find_last_not_of('0');
+  size_t p = s.find_last_not_of('0');
   if (p != std::string::npos) {
     s.resize(p + 1);  // Strip trailing zeroes.
     if (s.back() == '.') s.pop_back();  // Strip '.' if a whole number.
@@ -92,9 +92,9 @@ inline std::string IntToStringHex(int i, int xdigits) {
 // Portable implementation of strtoull().
 inline int64_t StringToInt(const char *str, int base = 10) {
   #ifdef _MSC_VER
-    return _strtoui64(str, nullptr, base);
+    return _strtoui64(str, NULL, base);
   #else
-    return strtoull(str, nullptr, base);
+    return strtoull(str, NULL, base);
   #endif
 }
 
@@ -181,7 +181,7 @@ inline std::string ConCatPathFileName(const std::string &path,
 // This function ensure a directory exists, by recursively
 // creating dirs for any parts of the path that don't exist yet.
 inline void EnsureDirExists(const std::string &filepath) {
-  auto parent = StripFileName(filepath);
+    std::string parent = StripFileName(filepath);
   if (parent.length()) EnsureDirExists(parent);
   #ifdef _WIN32
     _mkdir(filepath.c_str());
